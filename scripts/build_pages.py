@@ -27,11 +27,15 @@ for fname in PYTHON_FILES:
     if fpath.exists():
         files_dict[fname] = fpath.read_text(encoding="utf-8")
 
-# Read requirements
+# Read requirements (stlite includes streamlit core, so only external libraries needed)
 req_path = BASE_DIR / "requirements.txt"
 requirements = ["pandas", "numpy", "matplotlib", "plotly"]
 if req_path.exists():
-    lines = [l.strip() for l in req_path.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+    lines = [
+        l.strip()
+        for l in req_path.read_text(encoding="utf-8").splitlines()
+        if l.strip() and not l.startswith("#") and not l.lower().startswith("streamlit")
+    ]
     if lines:
         requirements = lines
 
@@ -133,3 +137,9 @@ index_html_content = f"""<!DOCTYPE html>
 output_file = DIST_DIR / "index.html"
 output_file.write_text(index_html_content, encoding="utf-8")
 print(f"Successfully generated {output_file} (size: {len(index_html_content)} bytes)")
+
+# Also update docs/index.html so both deployment methods are kept in sync
+docs_dir = BASE_DIR / "docs"
+docs_dir.mkdir(exist_ok=True)
+(docs_dir / "index.html").write_text(index_html_content, encoding="utf-8")
+print(f"Also updated {docs_dir / 'index.html'}")
